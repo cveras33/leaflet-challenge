@@ -67,17 +67,25 @@ d3.json(queryURL, function(data) {
 
   var legend = L.control({
     position: "bottomright"
-
   });
-  legend.onAdd = function(){
-    var div = L.DomUtil.create("div", "info legend"); 
-    var colors = ["#80ff00", "#d5ff80", "#ffd11a", "#ffb366", "#ff8533", "#ff3300"];
-    var color_values = [-10, 10, 30, 50, 70, 90];
+
+  legend.onAdd = function(map){
+    var div = L.DomUtil.create("div", "info legend"), 
+        color_values = [-10, 10, 30, 50, 70, 90]; 
+        //labels = [];  
+
+    //var colors = ["#80ff00", "#d5ff80", "#ffd11a", "#ffb366", "#ff8533", "#ff3300"];
+
 
     for(var i = 0; i < color_values.length; i++){
-      div.innerHTML += '<i style="background: ' + colors[i] + '"></i>' + 
+      div.innerHTML += '<i style="background:' + colorRetrieval(color_values[i] + 1) + '"></i>' + 
       color_values[i] + (color_values[i + 1] ? '&ndash;' + color_values[i+1] + '<br>' : '+');
+
+      console.log(div.innerHTML);
     }
+
+    
+
     return div; 
   };
 
