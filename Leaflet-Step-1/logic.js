@@ -1,7 +1,6 @@
-// Create a map object
 var myMap = L.map("map", {
   center: [37.09, -95.71],
-  zoom: 3
+  zoom: 5
 });
 
 L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -13,41 +12,37 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
   accessToken: API_KEY
 }).addTo(myMap);
 
-// Retrieve data 
-var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_month.geojson"; 
+var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
 
-// Make call to data 
-// Perform a GET request to the query URL
-d3.json(queryUrl, function(data) {
+d3.json(queryURL, function(data) {
 
   function createFeatures(feature){
     return{
       opacity: 1, 
       fillOpacity: 1, 
       fillColor: colorRetrieval(feature.geometry.coordinates[2]),
-      color: "#00000",
-      //build function to retrieve radius based on magnitude -- function name: radiusRetrieval()
-      radius: radiusRetrieval(feature.properties[0]),
-      stroke: True, 
-      weight: 0.5, 
+      color: "black",
+      radius: radiusRetrieval(feature.properties.mag),
+      stroke: true, 
+      weight: .5, 
     }; 
 
   }
 
   function colorRetrieval(depth){
-    switch(True){
+    switch(true){
       case depth > 90: 
-        return "#0000cc"; 
+        return "#ff3300"; 
       case depth > 70: 
-        return "#00cc00"; 
+        return "#ff8533"; 
       case depth > 50: 
-        return "#ff9933"; 
+        return "#ffb366"; 
       case depth > 30: 
-        return "#ff33cc"; 
+        return "#ffd11a"; 
       case depth > 10: 
-        return "#ffff00";
+        return "#d5ff80";
       default: 
-        return "#9933ff"; 
+        return "#80ff00"; 
     }
   }
 
@@ -55,30 +50,39 @@ d3.json(queryUrl, function(data) {
     if(mag === 0){
       return 1; 
     }
-    
-    return mag * 3; 
-
+    return mag * 4; 
   }
 
   L.geoJson(data, {
     pointToLayer: function(feature, latlng){
-      return 
-        L.circleMarker (latlng); 
-        style: createFeatures
+      return L.circleMarker(latlng); 
       },
-    
-    style: function(feature) {
-      return {
-        color: "white",
-        fillColor: chooseColor(feature.properties.borough),
-        fillOpacity: 0.5,
-        weight: 1.5
-      };
+    style: createFeatures,
+    onEachFeature: function(feature, layer){
+      layer.bindPopup(
+        "mag: " + feature.properties.mag + "<br>location: " + feature.properties.place
+      );
     }
   }).addTo(myMap);
 
-  // Once we get a response, send the data.features object to the createFeatures function
-  //createFeatures(data.features);
-});
+  var legend = L.control({
+    position: "bottomright"
 
+  });
+  legend.onAdd = function(){
+    var div = L.DomUtil.create("div", "info legend"); 
+    var colors = ["#80ff00", "#d5ff80", "#ffd11a", "#ffb366", "#ff8533", "#ff3300"];
+    var color_values = [-10, 10, 30, 50, 70, 90];
+
+    for(var i = 0; i < color_values.length; i++){
+      div.innerHTML += '<i style="background: ' + colors[i] + '"></i>' + 
+      color_values[i] + (color_values[i + 1] ? '&ndash;' + color_values[i+1] + '<br>' : '+');
+    }
+    return div; 
+  };
+
+  legend.addTo(myMap);
+
+
+});
 
