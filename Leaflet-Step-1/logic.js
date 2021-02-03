@@ -1,6 +1,6 @@
 var myMap = L.map("map", {
   center: [37.09, -95.71],
-  zoom: 5
+  zoom: 4
 });
 
 L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -17,7 +17,7 @@ var queryURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_mo
 d3.json(queryURL, function(data) {
 
   function createFeatures(feature){
-    return{
+    return {
       opacity: 1, 
       fillOpacity: 1, 
       fillColor: colorRetrieval(feature.geometry.coordinates[2]),
@@ -50,7 +50,7 @@ d3.json(queryURL, function(data) {
     if(mag === 0){
       return 1; 
     }
-    return mag * 4; 
+    return mag * 2.5; 
   }
 
   L.geoJson(data, {
@@ -60,22 +60,17 @@ d3.json(queryURL, function(data) {
     style: createFeatures,
     onEachFeature: function(feature, layer){
       layer.bindPopup(
-        "mag: " + feature.properties.mag + "<br>location: " + feature.properties.place
+        "Location: " + feature.properties.place + "<br> Coordinates: " + feature.geometry.coordinates[1] + ", " 
+        + feature.geometry.coordinates[0],
       );
     }
   }).addTo(myMap);
 
-  var legend = L.control({
-    position: "bottomright"
-  });
+  var legend = L.control({position: "bottomright"});
 
   legend.onAdd = function(map){
     var div = L.DomUtil.create("div", "info legend"), 
         color_values = [-10, 10, 30, 50, 70, 90]; 
-        //labels = [];  
-
-    //var colors = ["#80ff00", "#d5ff80", "#ffd11a", "#ffb366", "#ff8533", "#ff3300"];
-
 
     for(var i = 0; i < color_values.length; i++){
       div.innerHTML += '<i style="background:' + colorRetrieval(color_values[i] + 1) + '"></i>' + 
@@ -84,13 +79,9 @@ d3.json(queryURL, function(data) {
       console.log(div.innerHTML);
     }
 
-    
-
     return div; 
   };
 
   legend.addTo(myMap);
-
-
 });
 
